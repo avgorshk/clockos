@@ -1,5 +1,5 @@
 [package]
-name = "volatile"
+name = "xmodem"
 version = "0.1.0"
 
 [dependencies]
