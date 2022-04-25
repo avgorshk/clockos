@@ -47,12 +47,33 @@ struct Opt {
     raw: bool,
 }
 
+pub fn noop(_: Progress) {  }
+
 fn main() {
     use std::fs::File;
-    use std::io::{self, BufReader, BufRead};
+    use std::io::{BufReader, Read, Write};
 
     let opt = Opt::from_args();
     let mut serial = serial::open(&opt.tty_path).expect("path points to invalid TTY");
 
-    // FIXME: Implement the `ttywrite` utility.
+    let mut setting = serial.read_settings().expect("can not read TTY settings");
+    setting.set_baud_rate(opt.baud_rate).expect("invalid baud rate");
+    setting.set_char_size(opt.char_width);
+    setting.set_flow_control(opt.flow_control);
+    setting.set_stop_bits(opt.stop_bits);
+
+    serial.write_settings(&setting).expect("invalid settings");
+    let duration = Duration::new(opt.timeout, 0);
+    serial.set_timeout(duration).expect("invalid timeout");
+
+    let f = File::open(opt.input.expect("input file should be specified")).expect("input file is not found");
+    let mut reader = BufReader::new(f);
+
+    if opt.raw {
+        let mut buffer = Vec::new();
+        reader.read_to_end(&mut buffer).expect("unable to read file");
+        serial.write_all(&buffer).expect("unable to write to TTY");
+    } else {
+        Xmodem::transmit_with_progress(reader, serial, noop).expect("Xmodem transmit failed");
+    }
 }

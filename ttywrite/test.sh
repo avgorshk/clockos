@@ -29,7 +29,7 @@ if ! cargo build; then
 fi
 
 echo -e "${KBLU}Opening PTYs...${KNRM}"
-PARAMS="pty,echo=0,raw,ispeed=115200,ospeed=115200,parenb=0,cs8,cstopb=0"
+PARAMS="pty,echo=0,raw,parenb=0,cs8,cstopb=0"
 socat -u ${PARAMS},link=input ${PARAMS},link=output &
 sleep 1
 
@@ -45,7 +45,8 @@ for i in {1..10}; do
   echo -e "${KBLU}Running test ${i}/10.${KNRM}"
 
   input=$(rand_string)
-  echo -n "${input}" | ./target/debug/ttywrite -r input
+  echo -n "${input}" > data.input
+  ./target/debug/ttywrite input -i data.input -r
   output=$(cat output)
   if [[ "${output}" != "${input}" ]]; then
     echo -e "${KRED}ERROR: input and output differ${KNRM}" >&2
