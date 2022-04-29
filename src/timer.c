@@ -1,6 +1,7 @@
-#include "utils.h"
+#include "diod.h"
 #include "printf.h"
 #include "peripherals/timer.h"
+#include "utils.h"
 
 unsigned int hour = 0;
 unsigned int minute = 0;
@@ -14,6 +15,8 @@ void timer_init( void )
 	curVal = get32(TIMER_CLO);
 	curVal += interval;
 	put32(TIMER_C1, curVal);
+
+	diod_init();
 }
 
 void timer_print() {
@@ -60,6 +63,11 @@ void handle_timer_irq( void )
 	put32(TIMER_CS, TIMER_CS_M1);
 
 	timer_inc_second();
+	if ((second & 1) == 0) {
+		diod_enable();
+	} else {
+		diod_disable();
+	}
 
 	timer_print();
 }

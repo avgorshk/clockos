@@ -2,7 +2,7 @@
 #include "peripherals/mini_uart.h"
 #include "peripherals/gpio.h"
 
-void uart_send ( char c )
+void uart_send( char c )
 {
 	while(1) {
 		if(get32(AUX_MU_LSR_REG)&0x20)
@@ -11,7 +11,7 @@ void uart_send ( char c )
 	put32(AUX_MU_IO_REG,c);
 }
 
-char uart_recv ( void )
+char uart_recv( void )
 {
 	while(1) {
 		if(get32(AUX_MU_LSR_REG)&0x01)
@@ -27,7 +27,7 @@ void uart_send_string(char* str)
 	}
 }
 
-void uart_init ( void )
+void uart_init( void )
 {
 	unsigned int selector;
 
@@ -56,7 +56,7 @@ void uart_init ( void )
 
 
 // This function is required by printf function
-void putc ( void* p, char c)
+void putc( void* p, char c)
 {
 	uart_send(c);
 }
